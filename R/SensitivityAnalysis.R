@@ -25,7 +25,7 @@
 #' @param R Number of re-sampling from Pz_function to estimate the exposures probabilities
 #'
 #' @return Distribution of the causal effects as a function of theta (as data table)
-#' @examples In the following example, the effects  \tau(c11,c00), \tau(c10,c00) are estimated
+#' @examples In the following example, the effects  tau(c11,c00), tau(c10,c00) are estimated
 #' Z.obs <- Z_ber_clusters(N_clusters = 500, N_each_cluster_vec = rep(10,500), p = 0.5)
 #' thres <- runif(5000)
 #' base.Q <- generate_Q_matrix(N_clusters = 500,
