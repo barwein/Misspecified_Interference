@@ -42,7 +42,7 @@ NMR_estimator(
 Estimated causal effects (as data table)
 }
 \description{
-Return the estimated causal effects coupled with conservative variance using HT and Hajek NMR estimators
+Estimate causal effects and conservative variance using HT and Hajek NMR estimators
 }
 \details{
 Estimation of causal effects using a list of networks (represented as adjacency matrices);

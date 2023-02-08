@@ -5,7 +5,7 @@
 #' Sensitivity analysis (SA) for misspecification of the network interference structure
 #'
 #' @description
-#' Return the causal estimates from the obtained by perturbing the specified network
+#' Compute the distribution of causal estimates obtained from perturbing the specified network
 #'
 #' @details
 #' Examine how sensitive causal estimates are to deviations of the specified network;
