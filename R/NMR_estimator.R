@@ -50,7 +50,7 @@
  #' @import gtools
  #' @import parallel
  #' @import mgcv
- #'
+ #' @export
 NMR_estimator <- function(A.list,
                           Z.obs,
                           Y.obs,

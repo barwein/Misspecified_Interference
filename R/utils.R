@@ -7,6 +7,8 @@
 
 # Basic R functions -----------------------------------------------------------
 
+#' Compute exposure values in the four level thresholds model
+#' @noRd
 generate_exposures_threshold <- function(A, Z, threshold,deg=NULL){
   # Compute num neighbors
   if(is.null(deg)){
@@ -26,6 +28,8 @@ generate_exposures_threshold <- function(A, Z, threshold,deg=NULL){
   return(exposures)
 }
 
+#' Return a matrix of exposures
+#' @noRd
 exposures_under_network_list <- function(Z, A.list, exposure_func, param.list){
   # for m adj. matrices in A.list and n units, this function compute the nXm matrix of exposures under
   # each adj. matrix for treatment vector Z
@@ -34,7 +38,8 @@ exposures_under_network_list <- function(Z, A.list, exposure_func, param.list){
       sapply(A.list, function(A){do.call(exposure_func,list(A,Z,unlist(param.list)))})
       )}
 
-
+#' check which units have exposure ck under all networks
+#' @noRd
 specific_exposure_under_network_list <- function(exposures_mat, ck){
   # for some exposures matrix, this function return a binary (1/0) vector
   # of units that have exposure ck under all adj. matrics (rows in exposure_mat)
@@ -42,13 +47,11 @@ specific_exposure_under_network_list <- function(exposures_mat, ck){
     apply(exposures_mat,1,function(x){as.numeric(all(x==ck))})
          )}
 
-
+#' A function that returns a list of nXr indicator matrices (one for each exposures),
+#' that indicate if unit i in sample r is exposed to some ck under all A \in A.list
+#' The output is used for computation of exposures probabilities
+#' @noRd
 compute_prob_indicator <- function(R, n, Pz_function, pz_func_args, A.list, exposures_vec, exposure_func, exposure_func_args){
-  # A function that returns a list of nXr indicator matrices (one for each exposures),
-  # that indicate if unit i in sample r is exposed to some ck under all A \in A.list
-  # The output is used for computation of exposures probabilities
-
-
   # Init a list of nXR indicator matrices
   Ind.mat.list <- vector("list",length(exposures_vec))
   for (i in seq(length(exposures_vec))) {
@@ -77,12 +80,10 @@ compute_prob_indicator <- function(R, n, Pz_function, pz_func_args, A.list, expo
   return(Ind.mat.list)
 }
 
-
+#' From the list of indicator matrices, vector of exposures and relevant contrast,
+#' the function return a list of all relevant probability matrices
+#' @noRd
 compute_prob_matrices <- function(ind.mat.list, exposures_contrast, exposures_vec){
-
-  # From the list of indicator matrices, vector of exposures and relevant contrast,
-  # the function return a list of all relevant probability matrices
-
   n <- nrow(ind.mat.list[[1]])
   R <- ncol(ind.mat.list[[1]])
   # Init list that will contain all relevant probability matrices
@@ -112,7 +113,10 @@ compute_prob_matrices <- function(ind.mat.list, exposures_contrast, exposures_ve
 }
 
 
-
+#' Wrapper function that take as input all the adj. matrix list, R (number of iteration),
+#' exposures, exposures contrasts list, and Z sampler,
+#' and compute the list of probability matrices for the later use by MR estimator
+#' @noRd
 Get_prob_matrices_list <- function(R,
                                    n,
                                    Pz_function,
@@ -124,9 +128,6 @@ Get_prob_matrices_list <- function(R,
                                    # threshold,
                                    Palluck.et.al = FALSE,
                                    schid = NULL){
-  # Wrapper function that take as input all the adj. matrix list, R (number of iteration),
-  # exposures, exposures contrasts list, and Z sampler,
-  # and compute the list of probability matrices for the later use by MR estimator
 
   # First, get the indicator matrix list (list with length equal to exposures_vec,
   #                                         one matrix for each exposure)
@@ -156,9 +157,9 @@ Get_prob_matrices_list <- function(R,
   return(Prob_matrices_list)
 }
 
-
+#' Function that estimate the mean potential outcome using the MR estimator
+#' @noRd
 compute_MR_PO_estimator <- function(Y.obs, expos.obs.mat, ck, P.k){
-  # Function that estimate the mean potential outcome using the MR estimator
 
   n <- length(Y.obs)
   # Get indicator of exposure ck vector
@@ -176,8 +177,9 @@ compute_MR_PO_estimator <- function(Y.obs, expos.obs.mat, ck, P.k){
   return(list(ht_esti = HT_esti, hajek_esti = hajek_esti))
 }
 
+#' Function that compute the variance of the mean potential outcome  MR estimator
+#' @noRd
 compute_var_MR_PO_estimator <- function(Y.obs, expos.obs.mat, ck, P.k, estimate.n = FALSE){
-  # Function that compute the variance of the mean potential outcome  MR estimator
 
   n <- length(Y.obs)
   # Get indicator of exposure ck vector
@@ -221,6 +223,8 @@ compute_var_MR_PO_estimator <- function(Y.obs, expos.obs.mat, ck, P.k, estimate.
 }
 
 
+#' Compute the COV term of NMR
+#' @noRd
 compute_cov_MR_PO_estimator <- function(Y.obs, expos.obs.mat, ck, cl,
                                         P.k, P.l, P.kl,
                                         estimate.n = FALSE){
@@ -257,9 +261,11 @@ compute_cov_MR_PO_estimator <- function(Y.obs, expos.obs.mat, ck, cl,
 }
 
 
+#' Get linear residualized values from Hajek estimator
+#' only for units with exposure ck under all adj. matrix list.
+#' @noRd
 Hajek_residualized_Y <- function(Y.obs, ck, cl, expos.obs.mat, hajek_esti.ck, hajek_esti.cl){
-  # Get linear residualized values from Hajek estimator
-  # only for units with exposure ck under all adj. matrix list.
+
   ind.k <- specific_exposure_under_network_list(exposures_mat = expos.obs.mat, ck = ck)
   ind.l <- specific_exposure_under_network_list(exposures_mat = expos.obs.mat, ck = cl)
   y.resid <- ind.k*(Y.obs - hajek_esti.ck) + ind.l*(Y.obs - hajek_esti.cl)
@@ -267,6 +273,8 @@ Hajek_residualized_Y <- function(Y.obs, ck, cl, expos.obs.mat, hajek_esti.ck, ha
 }
 
 
+#' Wrapper function that compute point estimate and variance of causal effect \tau(ck,cl)
+#' @noRd
 MR_CE_wrapper <- function(Y.obs,
                           expos.obs.mat,
                           ck,
@@ -276,8 +284,6 @@ MR_CE_wrapper <- function(Y.obs,
                           P.kl,
                           estimate.n = FALSE,
                           compute.variance = TRUE){
-  # Wrapper function that compute point estimate and variance of causal effect \tau(ck,cl)
-
   # Get point estimates using HT and Hajek
   mu.ck <- compute_MR_PO_estimator(Y.obs = Y.obs,
                                    expos.obs.mat = expos.obs.mat,
@@ -357,6 +363,8 @@ MR_CE_wrapper <- function(Y.obs,
               var_ht_ce = var_ht_ce, var_hajek_ce = var_hajek_ce))
 }
 
+#' Wrapper for CE estimation with NMR
+#' @noRd
 MR_CE_estimator <- function(Z.obs,
                             Y.obs,
                             A.list,
@@ -401,6 +409,8 @@ MR_CE_estimator <- function(Z.obs,
 # Sensitivity analysis ----------------------------------------------------
 
 
+#' Generate Q matrix of SBM
+#' @noRd
 generate_Q_matrix <- function(N_clusters,
                               within_prob_vec,
                               between_prob_vec){
@@ -416,6 +426,8 @@ exp_spatial_distance <- function(dist_vec, theta){
 }
 
 
+#' Sample treatment with Bernoulli CRT
+#' @noRd
 Z_ber_clusters <- function(N_clusters,
                            N_each_cluster_vec,
                            p){
@@ -429,7 +441,8 @@ Z_ber_clusters <- function(N_clusters,
   return(unit_level_treatment_vec)
 }
 
-
+#' Generate PO as in the paper
+#' @noRd
 generate_po <- function(exposures, base.noise = NULL){
 
   if(is.null(base.noise)){
