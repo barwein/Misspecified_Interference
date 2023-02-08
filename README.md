@@ -5,6 +5,6 @@ For latest version please run
 
 ```{r}
 install.packages("devtools")
-devtools::install_github("barwein/CI_MIS")
+devtools::install_github("barwein/CIwithMIS")
 ```
 
