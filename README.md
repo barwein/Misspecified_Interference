@@ -6,7 +6,7 @@ For latest version please run
 
 ```{r}
 install.packages("devtools")
-devtools::install_github("barwein/CIwithMIS")
+devtools::install_github("barwein/Misspecified_Interference")
 ```
 
 ## Using the R package
