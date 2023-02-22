@@ -7,7 +7,7 @@ For latest version please run
 
 ```{r}
 install.packages("devtools")
-devtools::install_github("barwein/Misspecified_Interference")
+devtools::install_github("barwein/MisspecifiedInterference")
 ```
 
 ## Using the R package

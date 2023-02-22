@@ -1,4 +1,4 @@
-Package: Misspecified_Interference
+Package: MisspecifiedInterference
 Type: Package
 Title: Causal inference with misspecified interference structure
 Version: 1.0
