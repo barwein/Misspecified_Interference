@@ -1,6 +1,6 @@
 # Causal inference with misspecified interference structure
 R package that implements the network-misspecification-robust (NMR) estimator and the sensitivity analysis for network misspecification. \
-Theoretic background and full details are provided in the paper ``Causal inference with misspecified interference structure".
+Theoretic background and full details are provided in the paper ``Causal inference with misspecified interference structure" (https://arxiv.org/abs/2302.11322).
 
 ## Installation
 For latest version please run
