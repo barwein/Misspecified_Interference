@@ -8,7 +8,12 @@
 # Basic R functions -----------------------------------------------------------
 
 #' Compute exposure values in the four level thresholds model
-#' @noRd
+#' @param A adj. matrix of a network
+#' @param Z treatment vector
+#' @param threshold vector of unit-level thresholds
+#'
+#' @returns vector of observed exposures
+#' @export
 generate_exposures_threshold <- function(A, Z, threshold,deg=NULL){
   # Compute num neighbors
   if(is.null(deg)){
@@ -442,7 +447,10 @@ Z_ber_clusters <- function(N_clusters,
 }
 
 #' Generate PO as in the paper
-#' @noRd
+#' @param exposures vector of observed exposures
+#' @param base.noise baseline potential outcome
+#'
+#' @export
 generate_po <- function(exposures, base.noise = NULL){
 
   if(is.null(base.noise)){
@@ -451,10 +459,10 @@ generate_po <- function(exposures, base.noise = NULL){
   } else{
     y.00 <- base.noise
   }
-  Y <- 2*y.00*(exposures=="c11") +
-    1.25*y.00*(exposures=="c01") +
-    1.5*y.00*(exposures=="c10") +
-    1*y.00*(exposures=="c00")
+  Y <- (y.00+1)*(exposures=="c11") +
+    (y.00+0.25)*(exposures=="c01") +
+    (y.00+0.5)*(exposures=="c10") +
+    y.00*(exposures=="c00")
 
   return(Y)
 }

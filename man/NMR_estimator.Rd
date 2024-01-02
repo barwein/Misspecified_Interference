@@ -49,6 +49,8 @@ Estimation of causal effects using a list of networks (represented as adjacency 
 The estimator is unbiased if at least one of the networks is correctly specified
 }
 \examples{
+
+library(igraph)
 a1 <- as_adjacency_matrix(sample_gnp(1000,0.08))
 a2 <- as_adjacency_matrix(sample_gnp(1000,0.05))
 Z.obs <- rbinom(1000,1,0.5)

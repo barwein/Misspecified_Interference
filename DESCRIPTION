@@ -1,7 +1,7 @@
 Package: MisspecifiedInterference
 Type: Package
 Title: Causal inference with misspecified interference structure
-Version: 1.0
+Version: 1.0.1
 Author: Bar Weinstein
 Maintainer: Bar Weinstein <barwein@mail.tau.ac.il>
 Description: Estimation of causal effects using the network-misspecification-robust estimator,
@@ -17,5 +17,6 @@ Imports:
     gtools,
     igraph,
     mgcv,
-    parallel
+    parallel,
+    Matrix
 

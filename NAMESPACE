@@ -2,6 +2,9 @@
 
 export(NMR_estimator)
 export(SensitivityAnalysis)
+export(generate_exposures_threshold)
+export(generate_po)
+import(Matrix)
 import(data.table)
 import(gtools)
 import(igraph)

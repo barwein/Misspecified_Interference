@@ -24,6 +24,8 @@
  #'
  #' @return Estimated causal effects (as data table)
  #' @examples
+ #'
+ #' library(igraph)
  #' a1 <- as_adjacency_matrix(sample_gnp(1000,0.08))
  #' a2 <- as_adjacency_matrix(sample_gnp(1000,0.05))
  #' Z.obs <- rbinom(1000,1,0.5)
@@ -50,6 +52,7 @@
  #' @import gtools
  #' @import parallel
  #' @import mgcv
+ #' @import Matrix
  #' @export
 NMR_estimator <- function(A.list,
                           Z.obs,
