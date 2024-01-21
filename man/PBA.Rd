@@ -2,7 +2,7 @@
 % Please edit documentation in R/PBA.R
 \name{PBA}
 \alias{PBA}
-\title{Probabilistic bias analysis (SA) for misspecification of the network interference structure}
+\title{Probabilistic bias analysis (PBA) for misspecification of the network interference structure}
 \usage{
 PBA(
   N_units,
@@ -57,15 +57,15 @@ PBA(
 N_iterations samples from the bias-corrected posterior of the point estimates (HT and Hajek) of causal effects with and without accounting for random error via normal approximation
 }
 \description{
-Compute the distribution of causal estimates obtained from perturbing the specified network with a suspected deviation distribution and an according prior
+Compute the distribution of causal estimates obtained from perturbing the specified network with a suspected network deviation distribution and the relevant prior of choice.
 }
 \details{
 Approximate Bayesian procedure that estimate causal estimates while accounting for systematic (deviations of the specified network) and random errors;
-Suspected misspecification is represented with an induce distribution on the network;
+Suspected misspecification is represented by the induced distribution on the network;
 }
 \examples{
-In the following example, the effect  tau(c11,c00) is estimated with suspected deviation that randomly add missing edges with probability theta.;
-The baseline network consists of 50 well separated clusters, but cross-cluster contamination is present;
+# In the following example, the effect  tau(c11,c00) is estimated with suspected deviation that randomly add missing edges with probability theta.
+# The baseline network consists of 50 well separated clusters, but cross-cluster contamination is present.
 
 Z.obs <- Z_ber_clusters(N_clusters = 50, N_each_cluster_vec = rep(5,50), p = 0.5)
 base.Q <- generate_Q_matrix(N_clusters = 50,
