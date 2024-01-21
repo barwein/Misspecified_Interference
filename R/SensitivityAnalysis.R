@@ -51,7 +51,7 @@
 #' @import gtools
 #' @import parallel
 #' @import mgcv
-#' @export
+#' @noRd
 #'
 SensitivityAnalysis <- function(Z.obs,
                                 Y.obs,

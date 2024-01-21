@@ -1,11 +1,11 @@
 Package: MisspecifiedInterference
 Type: Package
 Title: Causal inference with misspecified interference structure
-Version: 1.0.1
+Version: 1.2
 Author: Bar Weinstein
 Maintainer: Bar Weinstein <barwein@mail.tau.ac.il>
-Description: Estimation of causal effects using the network-misspecification-robust estimator,
-            and sensitivity analysis of network misspecification.
+Description: Estimation of causal effects using the network-misspecification-robust estimator (NMR),
+            and probabilistic bias analysis (PBA) of network misspecification.
             Implements ``B. Weinstein & D. Nevo `Causal inference with misspecified interference structure` (2023)".
 License: `use_gpl_license()`
 Encoding: UTF-8
@@ -19,4 +19,6 @@ Imports:
     mgcv,
     parallel,
     Matrix
-
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
