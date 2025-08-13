@@ -410,162 +410,162 @@ MR_CE_estimator <- function(Z.obs,
 }
 
 
-
-# PBA ----------------------------------------------------
-
-
-#' Generate Q matrix of SBM
-#' @noRd
-generate_Q_matrix <- function(N_clusters,
-                              within_prob_vec,
-                              between_prob_vec){
-  Q <- matrix(NA, N_clusters, N_clusters)
-  diag(Q) <- within_prob_vec
-  Q[lower.tri(Q)] <- between_prob_vec
-  Q <- as.matrix(Matrix::forceSymmetric(Q, uplo = "L"))
-  return(Q)
-}
-
-exp_spatial_distance <- function(dist_vec, theta){
-  return(exp(-dist_vec/(mean(dist_vec)*theta)))
-}
-
-
-#' Sample treatment with Bernoulli CRT
-#' @noRd
-Z_ber_clusters <- function(N_clusters,
-                           N_each_cluster_vec,
-                           p){
-
-  treated_cluster_indicator = rep(0, N_clusters)
-  treated_cluster_idx = sample(x = seq(N_clusters),
-                               size = N_clusters %/% (1/p),
-                               replace = FALSE)
-  treated_cluster_indicator[treated_cluster_idx] <- 1
-  unit_level_treatment_vec = rep(treated_cluster_indicator, N_each_cluster_vec)
-  return(unit_level_treatment_vec)
-}
-
-#' Generate PO as in the paper
-#' @param exposures vector of observed exposures
-#' @param base.noise baseline potential outcome
 #'
-#' @export
-generate_po <- function(exposures, base.noise = NULL){
-
-  if(is.null(base.noise)){
-    n <- length(exposures)
-    y.00 <- runif(n = n, min = 0.5, max = 1.5)
-  } else{
-    y.00 <- base.noise
-  }
-  Y <- (y.00+1)*(exposures=="c11") +
-    (y.00+0.25)*(exposures=="c01") +
-    (y.00+0.5)*(exposures=="c10") +
-    y.00*(exposures=="c00")
-
-  return(Y)
-}
-
-#' Create perturb betwork from A.sp via the ``edges_prob_func" selected by the user
-#' @noRd
-generate_perturbed_network <- function(N_units,
-                                       A.sp,
-                                       edges_prob_func,
-                                       prior_func_list,
-                                       prior_func_args_list,
-                                       X.obs = NULL){
-  # Sample from prior
-  theta.length <- length(prior_func_list)
-  theta.vec <- vector("numeric",theta.length)
-  for (i in seq(theta.length)){
-    theta.vec[i] <- do.call(prior_func_list[[i]],prior_func_args_list[[i]])
-  }
-  # Generate P_\theta prob matrix (lower tri matrix with upper tri = 0 or NA)
-  if(is.null(X.obs)){
-    prob.lower.tri.matrix <- do.call(edges_prob_func, list(theta.vec, A.sp))
-  } else{
-    prob.lower.tri.matrix <- do.call(edges_prob_func, list(theta.vec, A.sp, X.obs))
-  }
-  # Sample edges
-  edges.prob.vec <- prob.lower.tri.matrix[lower.tri(prob.lower.tri.matrix)]
-  edges.lower.tri <- rbinom(n = length(edges.prob.vec), size = 1, prob = edges.prob.vec)
-  # Save as A.star
-  A.star <- matrix(NA, N_units, N_units)
-  A.star[lower.tri(A.star)] <- edges.lower.tri
-  diag(A.star) <- 0
-  # Make it symmetric (undirected)
-  A.star <- Matrix::forceSymmetric(A.star, uplo = "L")
-  return(A.star)
-}
-
-
-#' One iteration of PBA
-#' @noRd
-Single_PBA_general_iteration <- function(N_units,
-                                         A.sp,
-                                         edges_prob_func,
-                                         prior_func_list,
-                                         prior_func_args_list,
-                                         Z.obs,
-                                         Y.obs,
-                                         X.obs = NULL,
-                                         Pz_function,
-                                         pz_func_args,
-                                         exposures_vec,
-                                         exposures_contrast,
-                                         exposures_thresholds = NULL){
-
-  # Generate A.star (perturbed version of A.sp)
-  cur.A.star <- generate_perturbed_network(N_units = N_units,
-                                           A.sp = A.sp,
-                                           edges_prob_func = edges_prob_func,
-                                           prior_func_list = prior_func_list,
-                                           prior_func_args_list = prior_func_args_list,
-                                           X.obs = X.obs)
-
-
-  if(is.null(exposures_thresholds)){exposures_thresholds = rep(0, N_units)}
-
-  # Get prob. matrices for current censored network
-  prob.mat <- Get_prob_matrices_list(
-    # R = 10^4,
-    R = 10,
-    n = N_units,
-    Pz_function = Pz_function,
-    pz_func_args = pz_func_args,
-    A.list = list(cur.A.star),
-    exposures_contrast = exposures_contrast,
-    exposures_vec = exposures_vec,
-    threshold = exposures_thresholds)
-
-
-  cur.CE.estimates <- MR_CE_estimator(Z.obs = Z.obs,
-                                      Y.obs = Y.obs,
-                                      A.list = list(cur.A.star),
-                                      exposures_contrast = exposures_contrast,
-                                      exposures_vec = exposures_vec,
-                                      Prob_matrices_list = prob.mat,
-                                      exposure_func = generate_exposures_threshold,
-                                      exposure_func_args = list(A=cur.A.star,
-                                                                Z=Z.obs,
-                                                                threshold = exposures_thresholds))
-
-  cur.CE.estimates <- data.table(do.call(rbind,cur.CE.estimates))
-
-  # Add random error via normal approximation
-  cur.CE.estimates$ht_ce_w_re <- mapply(rnorm,
-                                        n=1,
-                                        mean=cur.CE.estimates$ht_ce,
-                                        sd=sqrt(cur.CE.estimates$var_ht_ce))
-
-  cur.CE.estimates$hajek_ce_w_re <- mapply(rnorm,
-                                           n=1,
-                                           mean=cur.CE.estimates$hajek_ce,
-                                           sd=sqrt(cur.CE.estimates$var_hajek_ce))
-
-  cur.CE.estimates$ce_contrast <- sapply(exposures_contrast, function(x){paste0(x[1],"-",x[2])})
-
-  return(cur.CE.estimates)
-}
+#' # PBA ----------------------------------------------------
+#'
+#'
+#' #' Generate Q matrix of SBM
+#' #' @noRd
+#' generate_Q_matrix <- function(N_clusters,
+#'                               within_prob_vec,
+#'                               between_prob_vec){
+#'   Q <- matrix(NA, N_clusters, N_clusters)
+#'   diag(Q) <- within_prob_vec
+#'   Q[lower.tri(Q)] <- between_prob_vec
+#'   Q <- as.matrix(Matrix::forceSymmetric(Q, uplo = "L"))
+#'   return(Q)
+#' }
+#'
+#' exp_spatial_distance <- function(dist_vec, theta){
+#'   return(exp(-dist_vec/(mean(dist_vec)*theta)))
+#' }
+#'
+#'
+#' #' Sample treatment with Bernoulli CRT
+#' #' @noRd
+#' Z_ber_clusters <- function(N_clusters,
+#'                            N_each_cluster_vec,
+#'                            p){
+#'
+#'   treated_cluster_indicator = rep(0, N_clusters)
+#'   treated_cluster_idx = sample(x = seq(N_clusters),
+#'                                size = N_clusters %/% (1/p),
+#'                                replace = FALSE)
+#'   treated_cluster_indicator[treated_cluster_idx] <- 1
+#'   unit_level_treatment_vec = rep(treated_cluster_indicator, N_each_cluster_vec)
+#'   return(unit_level_treatment_vec)
+#' }
+#'
+#' #' Generate PO as in the paper
+#' #' @param exposures vector of observed exposures
+#' #' @param base.noise baseline potential outcome
+#' #'
+#' #' @export
+#' generate_po <- function(exposures, base.noise = NULL){
+#'
+#'   if(is.null(base.noise)){
+#'     n <- length(exposures)
+#'     y.00 <- runif(n = n, min = 0.5, max = 1.5)
+#'   } else{
+#'     y.00 <- base.noise
+#'   }
+#'   Y <- (y.00+1)*(exposures=="c11") +
+#'     (y.00+0.25)*(exposures=="c01") +
+#'     (y.00+0.5)*(exposures=="c10") +
+#'     y.00*(exposures=="c00")
+#'
+#'   return(Y)
+#' }
+#'
+#' #' Create perturb betwork from A.sp via the ``edges_prob_func" selected by the user
+#' #' @noRd
+#' generate_perturbed_network <- function(N_units,
+#'                                        A.sp,
+#'                                        edges_prob_func,
+#'                                        prior_func_list,
+#'                                        prior_func_args_list,
+#'                                        X.obs = NULL){
+#'   # Sample from prior
+#'   theta.length <- length(prior_func_list)
+#'   theta.vec <- vector("numeric",theta.length)
+#'   for (i in seq(theta.length)){
+#'     theta.vec[i] <- do.call(prior_func_list[[i]],prior_func_args_list[[i]])
+#'   }
+#'   # Generate P_\theta prob matrix (lower tri matrix with upper tri = 0 or NA)
+#'   if(is.null(X.obs)){
+#'     prob.lower.tri.matrix <- do.call(edges_prob_func, list(theta.vec, A.sp))
+#'   } else{
+#'     prob.lower.tri.matrix <- do.call(edges_prob_func, list(theta.vec, A.sp, X.obs))
+#'   }
+#'   # Sample edges
+#'   edges.prob.vec <- prob.lower.tri.matrix[lower.tri(prob.lower.tri.matrix)]
+#'   edges.lower.tri <- rbinom(n = length(edges.prob.vec), size = 1, prob = edges.prob.vec)
+#'   # Save as A.star
+#'   A.star <- matrix(NA, N_units, N_units)
+#'   A.star[lower.tri(A.star)] <- edges.lower.tri
+#'   diag(A.star) <- 0
+#'   # Make it symmetric (undirected)
+#'   A.star <- Matrix::forceSymmetric(A.star, uplo = "L")
+#'   return(A.star)
+#' }
+#'
+#'
+#' #' One iteration of PBA
+#' #' @noRd
+#' Single_PBA_general_iteration <- function(N_units,
+#'                                          A.sp,
+#'                                          edges_prob_func,
+#'                                          prior_func_list,
+#'                                          prior_func_args_list,
+#'                                          Z.obs,
+#'                                          Y.obs,
+#'                                          X.obs = NULL,
+#'                                          Pz_function,
+#'                                          pz_func_args,
+#'                                          exposures_vec,
+#'                                          exposures_contrast,
+#'                                          exposures_thresholds = NULL){
+#'
+#'   # Generate A.star (perturbed version of A.sp)
+#'   cur.A.star <- generate_perturbed_network(N_units = N_units,
+#'                                            A.sp = A.sp,
+#'                                            edges_prob_func = edges_prob_func,
+#'                                            prior_func_list = prior_func_list,
+#'                                            prior_func_args_list = prior_func_args_list,
+#'                                            X.obs = X.obs)
+#'
+#'
+#'   if(is.null(exposures_thresholds)){exposures_thresholds = rep(0, N_units)}
+#'
+#'   # Get prob. matrices for current censored network
+#'   prob.mat <- Get_prob_matrices_list(
+#'     # R = 10^4,
+#'     R = 10,
+#'     n = N_units,
+#'     Pz_function = Pz_function,
+#'     pz_func_args = pz_func_args,
+#'     A.list = list(cur.A.star),
+#'     exposures_contrast = exposures_contrast,
+#'     exposures_vec = exposures_vec,
+#'     threshold = exposures_thresholds)
+#'
+#'
+#'   cur.CE.estimates <- MR_CE_estimator(Z.obs = Z.obs,
+#'                                       Y.obs = Y.obs,
+#'                                       A.list = list(cur.A.star),
+#'                                       exposures_contrast = exposures_contrast,
+#'                                       exposures_vec = exposures_vec,
+#'                                       Prob_matrices_list = prob.mat,
+#'                                       exposure_func = generate_exposures_threshold,
+#'                                       exposure_func_args = list(A=cur.A.star,
+#'                                                                 Z=Z.obs,
+#'                                                                 threshold = exposures_thresholds))
+#'
+#'   cur.CE.estimates <- data.table(do.call(rbind,cur.CE.estimates))
+#'
+#'   # Add random error via normal approximation
+#'   cur.CE.estimates$ht_ce_w_re <- mapply(rnorm,
+#'                                         n=1,
+#'                                         mean=cur.CE.estimates$ht_ce,
+#'                                         sd=sqrt(cur.CE.estimates$var_ht_ce))
+#'
+#'   cur.CE.estimates$hajek_ce_w_re <- mapply(rnorm,
+#'                                            n=1,
+#'                                            mean=cur.CE.estimates$hajek_ce,
+#'                                            sd=sqrt(cur.CE.estimates$var_hajek_ce))
+#'
+#'   cur.CE.estimates$ce_contrast <- sapply(exposures_contrast, function(x){paste0(x[1],"-",x[2])})
+#'
+#'   return(cur.CE.estimates)
+#' }
 
