@@ -13,6 +13,6 @@ library(MisspecifiedInterference)
 
 ## Using the R package
 
-The package contains one main function
+The package contains one main function:
 
 -- `NMR_estimator` which estimate causal effects using the NMR HT and Hajek estimators.
