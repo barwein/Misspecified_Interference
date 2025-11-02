@@ -51,25 +51,48 @@ The estimator is unbiased if at least one of the networks is correctly specified
 \examples{
 
 library(igraph)
-a1 <- as_adjacency_matrix(sample_gnp(1000,0.08))
-a2 <- as_adjacency_matrix(sample_gnp(1000,0.05))
-Z.obs <- rbinom(1000,1,0.5)
-thres <- runif(1000)
+n <- 5e2
+a1 <- as_adjacency_matrix(sample_gnp(n,0.08))
+a2 <- as_adjacency_matrix(sample_gnp(n,0.05))
+Z.obs <- rbinom(n,1,0.5)
+thres <- runif(n)
 expos <- generate_exposures_threshold(A = a1, Z = Z.obs, threshold = thres)
+
+
+generate_po <- function(exposures, base.noise = NULL){
+
+  if(is.null(base.noise)){
+    n <- length(exposures)
+    y.00 <- runif(n = n, min = 0.5, max = 1.5)
+  } else{
+    y.00 <- base.noise
+  }
+  Y <- (y.00+1)*(exposures=="c11") +
+    (y.00+0.25)*(exposures=="c01") +
+    (y.00+0.5)*(exposures=="c10") +
+    y.00*(exposures=="c00")
+  return(Y)
+}
+
 Y.obs <- generate_po(exposures = expos)
 exposure_vec <- c("c11","c00","c10","c01")
 exposures_contrast <- list(c("c11","c00"), c("c10","c00"))
+
+
+Z_ber <- function(n,p){
+rbinom(n = n, size = 1, prob = p)
+}
 
 NMR_estimator(A.list = list(a1,a2),
             Z.obs = Z.obs,
             Y.obs = Y.obs,
             Pz_function = Z_ber,
-            pz_func_args = list(n=1000,p=0.5),
+            pz_func_args = list(n=n,p=0.5),
             exposures_vec = exposure_vec,
             exposures_contrast = exposures_contrast,
             exposure_func = generate_exposures_threshold,
             exposure_func_args = list(threshold = thres),
-             R = 10^4)
+             R = 1e2)
 
 
 }
